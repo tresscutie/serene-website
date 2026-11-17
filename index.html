@@ -1012,6 +1012,16 @@
       font-family: 'Fredoka', sans-serif;
       font-size: 0.88rem;
     }
+
+    /* Animated pastel waves on Serene's welcome screen */
+    .pokedex-intro { overflow: hidden; isolation: isolate; }
+    .pokedex-intro > :not(.intro-waves) { position: relative; z-index: 2; }
+    .intro-waves { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+    .intro-wave { position: absolute; width: 200%; height: 28%; left: -50%; bottom: -12%; border-radius: 45% 55% 0 0 / 55% 55% 0 0; background: rgba(255,255,255,.24); animation: sereneWave 9s ease-in-out infinite alternate; }
+    .intro-wave:nth-child(2) { bottom: -16%; background: rgba(255,214,233,.50); animation-duration: 12s; animation-direction: alternate-reverse; transform-origin: center; }
+    .intro-wave:nth-child(3) { bottom: -20%; background: rgba(255,240,246,.65); animation-duration: 15s; }
+    @keyframes sereneWave { from { transform: translateX(-5%) rotate(-2deg) scaleY(1); } to { transform: translateX(5%) rotate(2deg) scaleY(1.2); } }
+    @media (prefers-reduced-motion: reduce) { .intro-wave { animation: none; } }
   </style>
 </head>
 <body>
@@ -1020,6 +1030,7 @@
 
   <!-- Pokédex Welcome Screen with Pokémon Theme Music Trigger -->
   <div class="pokedex-intro" id="pokedexIntro">
+    <div class="intro-waves" aria-hidden="true"><div class="intro-wave"></div><div class="intro-wave"></div><div class="intro-wave"></div></div>
     <div class="pokeball-loader"></div>
     <div class="intro-tag">✦ Pink Edition Pokédex ✦</div>
     <div class="intro-title">Serene's Editing Commission</div>
@@ -1306,7 +1317,7 @@
         osc.type = "square";
         osc.frequency.setValueAtTime(note.f, audioCtx.currentTime);
 
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.018, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + note.d);
 
         osc.connect(gain);
@@ -1337,7 +1348,7 @@
         osc.type = "sine";
         osc.frequency.setValueAtTime(440, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.14, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -1355,7 +1366,7 @@
         osc.type = "triangle";
         osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
         osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.06);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.22, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -1910,6 +1921,19 @@
     });
 
     selectCategory(CLIENT_PORTFOLIO.categories[0]);
+
+    // Cover dynamically created interactive elements without double-playing existing inline sounds.
+    document.addEventListener('pointerover', function(e) {
+      if (e.pointerType === 'touch') return;
+      const el = e.target.closest('button, a, .cat-pill, .arcade-card-item, .thumb-dot, .trainer-portrait-wrap');
+      if (!el || (e.relatedTarget && el.contains(e.relatedTarget))) return;
+      if (!el.hasAttribute('onmouseenter')) playHoverSound();
+    });
+    document.addEventListener('click', function(e) {
+      const el = e.target.closest('button, a, .cat-pill, .arcade-card-item, .thumb-dot, .trainer-portrait-wrap');
+      if (!el || el.hasAttribute('onclick')) return;
+      playClickSound();
+    });
   </script>
 </body>
 </html>
